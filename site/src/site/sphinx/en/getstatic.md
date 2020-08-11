@@ -1,7 +1,9 @@
 getstatic
 =========
 
-* It is recommended to use the [OGNL] (ognl.md) command, which will be more flexibility.
+[`getstatic` online tutorial](https://arthas.aliyun.com/doc/arthas-tutorials.html?language=en&id=command-getstatic)
+
+* It is recommended to use the [OGNL] (ognl.md) command, which will be more flexible.
 
 Check the static fields of classes conveniently, the usage is `getstatic class_name field_name`.
 

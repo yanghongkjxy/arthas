@@ -59,8 +59,6 @@ public class Ansi {
         }
     }
 
-    ;
-
     public static enum Attribute {
         RESET(0, "RESET"),
         INTENSITY_BOLD(1, "INTENSITY_BOLD"),
@@ -100,8 +98,6 @@ public class Ansi {
 
     }
 
-    ;
-
     public static enum Erase {
         FORWARD(0, "FORWARD"),
         BACKWARD(1, "BACKWARD"),
@@ -125,8 +121,6 @@ public class Ansi {
         }
     }
 
-    ;
-
     public static final String DISABLE = Ansi.class.getName() + ".disable";
 
     private static Callable<Boolean> detector = new Callable<Boolean>() {
@@ -136,7 +130,9 @@ public class Ansi {
     };
 
     public static void setDetector(final Callable<Boolean> detector) {
-        if (detector == null) throw new IllegalArgumentException();
+        if (detector == null) {
+            throw new IllegalArgumentException();
+        }
         Ansi.detector = detector;
     }
 
@@ -698,8 +694,9 @@ public class Ansi {
     }
 
     private void flushAttributes() {
-        if (attributeOptions.isEmpty())
+        if (attributeOptions.isEmpty()) {
             return;
+        }
         if (attributeOptions.size() == 1 && attributeOptions.get(0) == 0) {
             builder.append(FIRST_ESC_CHAR);
             builder.append(SECOND_ESC_CHAR);

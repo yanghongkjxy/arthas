@@ -25,11 +25,16 @@ public class DynamicCompiler {
     private final List<Diagnostic<? extends JavaFileObject>> warnings = new ArrayList<Diagnostic<? extends JavaFileObject>>();
 
     public DynamicCompiler(ClassLoader classLoader) {
+        if (javaCompiler == null) {
+            throw new IllegalStateException(
+                            "Can not load JavaCompiler from javax.tools.ToolProvider#getSystemJavaCompiler(),"
+                                            + " please confirm the application running in JDK not JRE.");
+        }
         standardFileManager = javaCompiler.getStandardFileManager(null, null, null);
 
         options.add("-Xlint:unchecked");
+        options.add("-g");
         dynamicClassLoader = new DynamicClassLoader(classLoader);
-
     }
 
     public void addSource(String className, String source) {
@@ -82,7 +87,7 @@ public class DynamicCompiler {
 
             return dynamicClassLoader.getClasses();
         } catch (Throwable e) {
-            throw new DynamicCompilerException(e);
+            throw new DynamicCompilerException(e, errors);
         } finally {
             compilationUnits.clear();
 
@@ -132,7 +137,7 @@ public class DynamicCompiler {
 
             return dynamicClassLoader.getByteCodes();
         } catch (ClassFormatError e) {
-            throw new DynamicCompilerException(e);
+            throw new DynamicCompilerException(e, errors);
         } finally {
             compilationUnits.clear();
 

@@ -1,13 +1,13 @@
 package com.taobao.arthas.core.command.express;
 
-import com.taobao.arthas.core.util.LogUtil;
-import com.taobao.middleware.logger.Logger;
+import com.alibaba.arthas.deps.org.slf4j.Logger;
+import com.alibaba.arthas.deps.org.slf4j.LoggerFactory;
 
 import ognl.ClassResolver;
-import ognl.DefaultMemberAccess;
 import ognl.MemberAccess;
 import ognl.Ognl;
 import ognl.OgnlContext;
+import ognl.OgnlRuntime;
 
 /**
  * @author ralf0131 2017-01-04 14:41.
@@ -15,7 +15,8 @@ import ognl.OgnlContext;
  */
 public class OgnlExpress implements Express {
     private static final MemberAccess MEMBER_ACCESS = new DefaultMemberAccess(true);
-    Logger logger = LogUtil.getArthasLogger();
+    private static final Logger logger = LoggerFactory.getLogger(OgnlExpress.class);
+    private static final ArthasObjectPropertyAccessor OBJECT_PROPERTY_ACCESSOR = new ArthasObjectPropertyAccessor();
 
     private Object bindObject;
     private final OgnlContext context;
@@ -25,10 +26,8 @@ public class OgnlExpress implements Express {
     }
 
     public OgnlExpress(ClassResolver classResolver) {
-        context = new OgnlContext();
-        context.setClassResolver(classResolver);
-        // allow private field access
-        context.setMemberAccess(MEMBER_ACCESS);
+        OgnlRuntime.setPropertyAccessor(Object.class, OBJECT_PROPERTY_ACCESSOR);
+        context = new OgnlContext(MEMBER_ACCESS, classResolver, null, null);
     }
 
     @Override
@@ -36,7 +35,7 @@ public class OgnlExpress implements Express {
         try {
             return Ognl.getValue(express, context, bindObject);
         } catch (Exception e) {
-            logger.error(null, "Error during evaluating the expression:", e);
+            logger.error("Error during evaluating the expression:", e);
             throw new ExpressException(express, e);
         }
     }
@@ -44,7 +43,7 @@ public class OgnlExpress implements Express {
     @Override
     public boolean is(String express) throws ExpressException {
         final Object ret = get(express);
-        return null != ret && ret instanceof Boolean && (Boolean) ret;
+        return ret instanceof Boolean && (Boolean) ret;
     }
 
     @Override
@@ -62,9 +61,6 @@ public class OgnlExpress implements Express {
     @Override
     public Express reset() {
         context.clear();
-        context.setClassResolver(CustomClassResolver.customClassResolver);
-        // allow private field access
-        context.setMemberAccess(MEMBER_ACCESS);
         return this;
     }
 }
